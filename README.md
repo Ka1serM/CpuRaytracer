@@ -1,1 +1,5 @@
-# Simple Whitted-Style Ray Tracer with Global Illumination, Ambient Occlusion and Soft Shadows, Written in Java
+# CpuRaytracer
+
+Whitted-Style Ray Tracer with Global Illumination, Ambient Occlusion and Soft Shadows, written in Java.
+
+![Screenshot](./Screenshot.png)

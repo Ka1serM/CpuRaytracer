@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CpuRaytracer.iml" filepath="$PROJECT_DIR$/CpuRaytracer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/VCG_Raytracer.iml" filepath="$PROJECT_DIR$/VCG_Raytracer.iml" />
     </modules>
   </component>
 </project>
