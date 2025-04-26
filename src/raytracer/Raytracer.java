@@ -21,6 +21,7 @@ import cameras.PerspectiveCamera;
 import lights.Light;
 import materials.Material;
 import materials.UnlitMaterial;
+import scene.models.Transform;
 import scene.models.primitives.Sphere;
 import raytracer.ray.Intersection;
 import raytracer.ray.Ray;
@@ -152,7 +153,7 @@ public class Raytracer {
 
         PerspectiveCamera camera = new PerspectiveCamera(mRenderWindow.getJFrame(), new Vec3(0, 0, 4f), new Vec3(0, 0, 0), new Vec3(0.0f, 1.0f, 0.0f), (float) width / height, 70f);
 
-        Sphere sphere = new Sphere(new Vec3(0, 0, 0), 1f, new UnlitMaterial(RgbColor.RED));
+        Sphere sphere = new Sphere(new Transform(new Vec3(0, 0, 0)), 1f, new UnlitMaterial(RgbColor.RED));
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -204,8 +205,8 @@ public class Raytracer {
             }
 
             //Save Image every 8 Samples
-            if (currentSample % 8 == 0)
-                this.exportRendering();
+            //if (currentSample % 8 == 0)
+            //    this.exportRendering();
         });
 
         for (int by = 0; by < blocksY; by++) {

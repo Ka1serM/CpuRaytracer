@@ -75,13 +75,13 @@ public class ReflectiveMaterial implements Material {
 
             RgbColor diffuseComponent = diffuse.multScalar(NdotL);
 
-            // Specular component (Phong reflection)
-            // Calculate the reflection vector R
-            Vec3 R = RayUtils.reflect(L, normal);  // Reflect light direction L about normal N
-            float RdotV = R.scalar(V);   // Dot product between reflection vector and view direction
-            float kS = Math.max(0, RdotV);  // Ensure the dot product is non-negative
-            kS = (float) Math.pow(kS, shininess);  // Apply shininess exponent
-            RgbColor specularComponent = specular.multScalar(kS);  // Scale by shininess factor
+            //Phong reflection
+            //reflection vector R
+            Vec3 R = RayUtils.reflect(L, normal);  //Reflect light direction L about normal N
+            float RdotV = R.scalar(V);   //Dot product between reflection vector and view direction
+            float kS = Math.max(0, RdotV);  //Ensure the dot product is non-negative
+            kS = (float) Math.pow(kS, shininess);  //Apply shininess exponent
+            RgbColor specularComponent = specular.multScalar(kS);
 
             accumulatedColor = accumulatedColor.add(diffuseComponent.add(specularComponent).multRGB(light.getColor()).multScalar(intensity));
         }

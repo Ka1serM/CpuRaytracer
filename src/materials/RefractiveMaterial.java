@@ -30,52 +30,36 @@ public class RefractiveMaterial implements Material {
     }
 
     public Ray refract(Intersection intersection, Ray ray) {
-        float etaRatio;
-        float cosThetaI;
+        Vec3 N = intersection.normal().normalize(); //Normale
+        Vec3 I = ray.direction().normalize();       //Einfallsrichtung
 
-        Vec3 normal = intersection.normal().normalize();
-        Vec3 incident = ray.direction().normalize();
-        float dotNI = normal.scalar(incident);
+        float cosTheta = N.scalar(I);
 
-        // Determine refraction parameters based on the angle of incidence
-        if (dotNI < 0.0f) {
-            etaRatio = 1.0f / ior;
-            cosThetaI = -dotNI;
+        float etaI = 1.0f; //IOR von Luft
+        float etaT = ior; //IOR des Materials
+
+        //Strahl kommt von innen, da Einfallsrichtung entgegengesetzt der Normale
+        if (cosTheta > 0) {
+            Vec3 tmp = N.negate(); //Normale umdrehen
+            N = tmp;
+            float swap = etaI;
+            etaI = etaT;
+            etaT = swap;
+            cosTheta = Math.abs(cosTheta); //positiver Wert
+        }
+
+        float eta = etaI / etaT;
+        float k = 1.0f - eta * eta * (1.0f - cosTheta * cosTheta);
+
+        if (k < 0.0f) {
+            //Totalreflexion: reflektieren
+            Vec3 reflected = I.sub(N.multScalar(2.0f * I.scalar(N)));
+            return new Ray(intersection.position(), reflected);
         } else {
-            etaRatio = ior;
-            normal = normal.invert();  // Flip the normal if the ray is entering the material
-            cosThetaI = dotNI;
+            //Normale Brechung
+            Vec3 refracted = I.multScalar(eta)
+                    .add(N.multScalar(eta * cosTheta - (float)Math.sqrt(k)));
+            return new Ray(intersection.position(), refracted.normalize());
         }
-
-        // Calculate the sine of the refraction angle
-        float cos2ThetaI = cosThetaI * cosThetaI;
-        float sin2ThetaI = 1.0f - cos2ThetaI;
-        float sin2ThetaT = etaRatio * etaRatio * sin2ThetaI;
-
-        // Handle Total Internal Reflection (TIR) case
-        if (sin2ThetaT > 1.0f) {
-            return reflectInternal(intersection, ray);
-        }
-
-        // Calculate the refracted direction
-        float cosThetaT = (float) Math.sqrt(Math.max(0.0f, 1.0f - sin2ThetaT));
-        Vec3 refractDir = incident.multScalar(etaRatio).add(normal.multScalar(etaRatio * cosThetaI - cosThetaT)).normalize();
-
-        // Return the refracted ray
-        return new Ray(intersection.position(), refractDir);
-    }
-
-    public Ray reflectInternal(Intersection intersection, Ray ray) {
-        Vec3 position = intersection.position();
-        Vec3 normal = intersection.normal();
-        Vec3 viewDir = ray.direction();
-
-        // Calculate the ideal reflection direction (perfect mirror reflection)
-        Vec3 reflected = RayUtils.reflect(viewDir, normal);
-        // Offset the position to avoid self-intersection
-        Vec3 offsetPosition = position.add(normal.multScalar(RAY_EPSYLON));
-
-        // Return the reflected ray with the calculated direction
-        return new Ray(offsetPosition, reflected);
     }
 }

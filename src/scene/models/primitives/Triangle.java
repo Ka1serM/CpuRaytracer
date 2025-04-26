@@ -25,39 +25,28 @@ import static raytracer.ray.RayUtils.RAY_EPSYLON;
 
         @Override
         public Intersection hit(Ray r) {
-            Vec3 edge1;
-            Vec3 edge2;
-            Vec3 h;
-            Vec3 s;
-            Vec3 q;
-            float a, f, u, v;
-
-            // Calculate edges of the triangle
-            edge1 = vertex1.sub(vertex0);  // Using sub method to get the edge vector (creates a new Vec3)
-            edge2 = vertex2.sub(vertex0);  // Using sub method to get the edge vector (creates a new Vec3)
+            Vec3 edge1 = vertex1.sub(vertex0);
+            Vec3 edge2 = vertex2.sub(vertex0);
 
             // Compute the determinant (a)
-            h = r.direction().cross(edge2);  // Using cross to compute h
-            a = edge1.scalar(h);
+            Vec3 h = r.direction().cross(edge2);  // Using cross to compute h
+            float a = edge1.scalar(h);
 
-            if (a > -RAY_EPSYLON && a < RAY_EPSYLON) {
+            if (a > -RAY_EPSYLON && a < RAY_EPSYLON)
                 return null;    // This ray is parallel to this triangle.
-            }
 
-            f = 1.0f / a;
-            s = r.origin().sub(vertex0);  // Calculate s = ray origin - vertex0
-            u = f * s.scalar(h);
+            float f = 1.0f / a;
+            Vec3 s = r.origin().sub(vertex0);  // Calculate s = ray origin - vertex0
+            float u = f * s.scalar(h);
 
-            if (u < 0.0 || u > 1.0) {
+            if (u < 0.0 || u > 1.0)
                 return null;
-            }
 
-            q = s.cross(edge1);  // Compute q = s x edge1
-            v = f * r.direction().scalar(q);
+            Vec3 q = s.cross(edge1);  // Compute q = s x edge1
+            float v = f * r.direction().scalar(q);
 
-            if (v < 0.0 || u + v > 1.0) {
+            if (v < 0.0 || u + v > 1.0)
                 return null;
-            }
 
             // Calculate the distance to the intersection point
             float t = f * edge2.scalar(q);
@@ -75,9 +64,10 @@ import static raytracer.ray.RayUtils.RAY_EPSYLON;
 
                 // Create and return the Intersection object
                 return new Intersection(t, intersectionPoint, interpolatedNormal, this.material);
-            } else {  // No ray intersection
-                return null;
             }
+
+            //no ray intersection
+            return null;
         }
 }
 

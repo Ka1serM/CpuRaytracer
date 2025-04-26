@@ -3,64 +3,62 @@ package scene.models.primitives;
 import materials.Material;
 import raytracer.ray.Intersection;
 import raytracer.ray.Ray;
-import scene.models.Hittable;
+import raytracer.ray.RayUtils;
+import scene.models.Transform;
+import utils.algebra.Matrix4x4;
 import utils.algebra.Vec2;
 import utils.algebra.Vec3;
 
 public class Plane extends Shape {
     private final Material material;
-    private final Vec3 origin;
+    private final Matrix4x4 transform;
     private final Vec3 normal;
     private final Vec2 scale;
 
-    public Plane(Vec3 origin, Vec3 normal, Vec2 scale, Material material) {
-        this.origin = origin;
-        this.normal = normal.normalize();  // Make sure normal is normalized
+    public Plane(Transform transform, Vec3 normal, Vec2 scale, Material material) {
+        this.transform = transform.getMatrix();
+        this.normal = normal.normalize();  //make sure normal is normalized
         this.scale = scale;
         this.material = material;
     }
 
-    // Optimized Ray-plane intersection
-    public float intersect(Ray ray) {
-        // Precompute the dot product of normal and ray direction
-        float denom = normal.scalar(ray.direction());
-
-        // Check if the ray is parallel to the plane (denom close to zero)
-        if (Math.abs(denom) > 1e-6) {
-            // Compute the distance t to the plane
-            float t = normal.scalar(origin.sub(ray.origin())) / denom;
-            return (t >= 0) ? t : Float.POSITIVE_INFINITY; // Valid intersection if t >= 0
-        }
-
-        // Ray is parallel to the plane, return infinity (no intersection)
-        return Float.POSITIVE_INFINITY;
-    }
-
     @Override
     public Intersection hit(Ray ray) {
-        // Get the intersection distance (t) from the ray-plane intersection
-        float t = intersect(ray);
+        // Transform the ray into the plane's local space
+        Matrix4x4 invTransform = transform.invert();
+        Vec3 transformedOrigin = invTransform.multVec3(ray.origin(), true);
+        Vec3 transformedDirection = invTransform.multVec3(ray.direction(), false);
 
-        // No intersection if t is infinity
-        if (t == Float.POSITIVE_INFINITY)
+        Vec3 localNormal = invTransform.multVec3(normal, false).normalize();
+        Vec3 planeOrigin = new Vec3(0, 0, 0);
+
+        float denom = localNormal.scalar(transformedDirection);
+        if (Math.abs(denom) <= RayUtils.RAY_EPSYLON)
             return null;
 
-        // Calculate the hit point on the plane
-        Vec3 hitPoint = ray.origin().add(ray.direction().multScalar(t));
+        float t = localNormal.scalar(planeOrigin.sub(transformedOrigin)) / denom;
+        if (t < 0)
+            return null;
 
-        // Compute the local coordinates (u, v) in the plane
-        // Tangents (localX and localY)
-        Vec3 tangent1 = (Math.abs(normal.y) > 0.9f) ? new Vec3(1, 0, 0) : normal.cross(new Vec3(0, 1, 0)).normalize();
-        Vec3 tangent2 = normal.cross(tangent1).normalize();
+        Vec3 localHitPoint = transformedOrigin.add(transformedDirection.multScalar(t));
 
-        float localX = hitPoint.sub(origin).scalar(tangent1);
-        float localY = hitPoint.sub(origin).scalar(tangent2);
+        //Tangents for local coordinates
+        Vec3 tangent1 = (Math.abs(localNormal.y) > 0.9f) ? new Vec3(1, 0, 0) : localNormal.cross(new Vec3(0, 1, 0)).normalize();
+        Vec3 tangent2 = localNormal.cross(tangent1).normalize();
 
-        // Check if the hit point is within the bounds of the plane
-        if (Math.abs(localX) <= scale.x / 2 && Math.abs(localY) <= scale.y / 2)
-            return new Intersection(t, hitPoint, normal, material);
+        //Local (u, v) coordinates
+        Vec3 offset = localHitPoint.sub(planeOrigin);
+        float localX = offset.scalar(tangent1);
+        float localY = offset.scalar(tangent2);
 
-        // If the hit point is outside the bounds of the plane
-        return null;
+        //check bounds
+        if (Math.abs(localX) > scale.x / 2 || Math.abs(localY) > scale.y / 2)
+            return null;
+
+        //Transform hit point and normal back to world space
+        Vec3 hitPoint = transform.multVec3(localHitPoint, true);
+        Vec3 worldNormal = invTransform.transpose().multVec3(localNormal, false).normalize();
+
+        return new Intersection(t, hitPoint, worldNormal, material);
     }
 }
