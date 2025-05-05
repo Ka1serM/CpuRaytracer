@@ -41,9 +41,4 @@ public class OrthographicCamera implements Camera {
     public Vec3 getOrigin() {
         return origin;
     }
-
-    @Override
-    public boolean isMoving() {
-        return false;
-    }
 }

@@ -26,11 +26,9 @@ import scene.models.primitives.Sphere;
 import raytracer.ray.Intersection;
 import raytracer.ray.Ray;
 import scene.Scene;
-import scene.models.Hittable;
 import ui.Window;
 import utils.*;
 import utils.algebra.Vec3;
-import utils.io.DataExporter;
 import utils.io.Log;
 
 import java.awt.image.BufferedImage;
@@ -126,7 +124,7 @@ public class Raytracer {
         int width = mBufferedImage.getWidth();
         int height = mBufferedImage.getHeight();
 
-        PerspectiveCamera camera = new PerspectiveCamera(mRenderWindow.getJFrame(), new Vec3(0, 0, 17f), new Vec3(0, 0, 0), new Vec3(0.0f, 1.0f, 0.0f), (float) width / height, 170f);
+        PerspectiveCamera camera = new PerspectiveCamera(new Vec3(0, 0, 17f), new Vec3(0, 0, 0), new Vec3(0.0f, 1.0f, 0.0f), (float) width / height, 170f);
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -151,7 +149,7 @@ public class Raytracer {
         int width = mBufferedImage.getWidth();
         int height = mBufferedImage.getHeight();
 
-        PerspectiveCamera camera = new PerspectiveCamera(mRenderWindow.getJFrame(), new Vec3(0, 0, 4f), new Vec3(0, 0, 0), new Vec3(0.0f, 1.0f, 0.0f), (float) width / height, 70f);
+        PerspectiveCamera camera = new PerspectiveCamera(new Vec3(0, 0, 4f), new Vec3(0, 0, 0), new Vec3(0.0f, 1.0f, 0.0f), (float) width / height, 70f);
 
         Sphere sphere = new Sphere(new Transform(new Vec3(0, 0, 0)), 1f, new UnlitMaterial(RgbColor.RED));
 
@@ -238,13 +236,9 @@ public class Raytracer {
 
                                 colorAccum = colorAccum.multScalar(1f / mAntiAliasingSamples);
 
-                                if (!camera.isMoving()) {
-                                    RgbColor oldColor = hdrColors[index];
-                                    RgbColor blended = colorAccum.add(oldColor.multScalar(localSample)).multScalar(1f / (localSample + 1f));
-                                    hdrColors[index] = blended;
-                                }
-                                else
-                                    hdrColors[index] = colorAccum;
+                                RgbColor oldColor = hdrColors[index];
+                                RgbColor blended = colorAccum.add(oldColor.multScalar(localSample)).multScalar(1f / (localSample + 1f));
+                                hdrColors[index] = blended;
                             }
                         }
 
@@ -267,7 +261,6 @@ public class Raytracer {
             Thread.currentThread().interrupt();
         }
     }
-
 
     private RgbColor traceRecursive(Ray ray, int depth) {
         Intersection intersection = findClosestIntersection(mScene.getObjects(), ray);

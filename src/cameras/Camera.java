@@ -8,6 +8,4 @@ public interface Camera {
     Ray getRay(float u, float v);
 
     Vec3 getOrigin();
-
-    boolean isMoving();
 }

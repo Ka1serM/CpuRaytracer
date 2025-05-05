@@ -52,7 +52,7 @@ public class Plane extends Shape {
         float localY = offset.scalar(tangent2);
 
         //check bounds
-        if (Math.abs(localX) > scale.x / 2 || Math.abs(localY) > scale.y / 2)
+        if (Math.abs(localX) > scale.x || Math.abs(localY) > scale.y)
             return null;
 
         //Transform hit point and normal back to world space

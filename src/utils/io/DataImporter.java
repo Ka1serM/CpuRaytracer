@@ -5,6 +5,7 @@ package utils.io;
 
 import materials.Material;
 import scene.models.SceneObject;
+import scene.models.Transform;
 import scene.models.primitives.Triangle;
 import utils.algebra.Vec3;
 
@@ -18,7 +19,7 @@ public class DataImporter {
 
 	public DataImporter() {}
 
-	public static List<SceneObject> loadObjFile(String filePath, Vec3 position, Material material) {
+	public static List<SceneObject> loadObjFile(String filePath, Transform transform, Material material) {
 		List<Vec3> vertices = new ArrayList<>();
 		List<Vec3> normals = new ArrayList<>();
 		List<SceneObject> triangles = new ArrayList<>();
@@ -60,12 +61,12 @@ public class DataImporter {
 
 					triangles.add(
 						new Triangle(
-							vertices.get(vertexIndex1).add(position),
-							normals.get(normalIndex1),
-							vertices.get(vertexIndex2).add(position),
-							normals.get(normalIndex2),
-							vertices.get(vertexIndex3).add(position),
-							normals.get(normalIndex3),
+							transform.getMatrix().multVec3(vertices.get(vertexIndex1), true),
+							transform.getMatrix().invert().transpose().multVec3(normals.get(normalIndex1), true),
+							transform.getMatrix().multVec3(vertices.get(vertexIndex2), true),
+							transform.getMatrix().invert().transpose().multVec3(normals.get(normalIndex2), true),
+							transform.getMatrix().multVec3(vertices.get(vertexIndex3), true),
+							transform.getMatrix().invert().transpose().multVec3(normals.get(normalIndex3), true),
 							material
 						)
 					);
